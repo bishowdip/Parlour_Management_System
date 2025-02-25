@@ -31,6 +31,13 @@ def create_tables():
                       name TEXT,
                       email TEXT,
                       security_answer TEXT)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS contact_queries (
+                      id INTEGER PRIMARY KEY,
+                      name TEXT,
+                      email TEXT,
+                      subject TEXT,
+                      message TEXT,
+                      submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
 
     # Create the services table
     cursor.execute('''CREATE TABLE IF NOT EXISTS services (
@@ -106,6 +113,31 @@ def check_users_table_schema():
     for column in columns:
         print(column)
     conn.close()
+
+# Function to save a contact query
+def create_contact_query(name, email, subject, message):
+    conn = sqlite3.connect('salon.db')
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''INSERT INTO contact_queries (name, email, subject, message)
+                          VALUES (?, ?, ?, ?)''',
+                       (name, email, subject, message))
+        conn.commit()
+        print("Contact query saved successfully!")
+    except sqlite3.Error as e:
+        print(f"Error saving query: {e}")
+    finally:
+        conn.close()
+
+# Function to get all contact queries (for employees)
+def get_all_contact_queries():
+    conn = sqlite3.connect('salon.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM contact_queries ORDER BY submitted_at DESC")
+    queries = cursor.fetchall()
+    conn.close()
+    return queries
+
 
 # Function to get all services
 def get_services():

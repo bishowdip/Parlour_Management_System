@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from database import get_user
 from database import create_tables
-
+import hashlib  # Import hashlib for password hashing
+from home import create_home_window  # Import the create_home_window function
 
 def toggle_password():
     if password_entry.cget("show") == "*":
@@ -16,13 +17,19 @@ def login():
     username = username_entry.get().strip()
     password = password_entry.get().strip()
     user = get_user(username)
-    print(f"User from DB: {user}")
-    if user and user[2] == password:  # Simple password check
-        messagebox.showinfo("Success", "Login successful!")
-        root.destroy()  # Close login window
-        open_home()  # Open home window
+    if user:
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        if user[2] == password_hash:
+            messagebox.showinfo("Success", "Login successful!")
+            root.destroy()
+            user_role = user[3]
+            home_root = tk.Tk()
+            create_home_window(home_root, user_role=user_role)  # Use the imported function
+            home_root.mainloop()
+        else:
+            messagebox.showerror("Error", "Invalid password")
     else:
-        messagebox.showerror("Error", "Invalid username or password")
+        messagebox.showerror("Error", "User not found")
 
 def open_signup():
     root.destroy()  # Close login window
@@ -33,12 +40,6 @@ def open_forgot_password():
     root.destroy()  # Close login window
     import forgot_password
     forgot_password.create_forgot_password_window()
-
-def open_home():
-    import home
-    home_root = tk.Tk()
-    home.create_home_window(home_root)
-    home_root.mainloop()
 
 # Create login window
 root = tk.Tk()
@@ -80,4 +81,5 @@ root.grid_columnconfigure(1, weight=1)
 
 create_tables()
 
-root.mainloop()
+if __name__ == "__main__":
+    root.mainloop()

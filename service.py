@@ -13,29 +13,37 @@ services = [
     {"id": 8, "name": "Nail Extension", "description": "Single & both hand.", "price": "RS 1200"},
 ]
 
-# Create the main application window
-root = tk.Tk()
-root.title("Parlor Services")
-root.iconbitmap("services.ico")
+def create_service_window():
+    """Create and display the services window."""
+    # Create a Toplevel window
+    service_window = tk.Toplevel()
+    service_window.title("Parlor Services")
+    service_window.iconbitmap("services.ico")
 
-# Create a Treeview widget to display the services
-tree = ttk.Treeview(root, columns=("ID", "Name", "Description", "Price"), show="headings")
-tree.heading("ID", text="ID")
-tree.heading("Name", text="Name")
-tree.heading("Description", text="Description")
-tree.heading("Price", text="Price")
+    # Create a Treeview widget to display the services
+    tree = ttk.Treeview(service_window, columns=("ID", "Name", "Description", "Price"), show="headings")
+    tree.heading("ID", text="ID")
+    tree.heading("Name", text="Name")
+    tree.heading("Description", text="Description")
+    tree.heading("Price", text="Price")
 
-# Configure column widths (optional)
-tree.column("ID", width=50, anchor="center")
-tree.column("Name", width=150)
-tree.column("Description", width=300)
-tree.column("Price", width=100, anchor="center")
+    # Configure column widths (optional)
+    tree.column("ID", width=50, anchor="center")
+    tree.column("Name", width=150)
+    tree.column("Description", width=300)
+    tree.column("Price", width=100, anchor="center")
 
-tree.pack(fill=tk.BOTH, expand=True)
+    tree.pack(fill=tk.BOTH, expand=True)
 
-# Insert services data into the Treeview
-for service in services:
-    tree.insert("", "end", values=(service["id"], service["name"], service["description"], service["price"]))
+    # Insert services data into the Treeview
+    for service in services:
+        tree.insert("", "end", values=(service["id"], service["name"], service["description"], service["price"]))
 
-# Run the application
-root.mainloop()
+    # Run the Toplevel window
+    service_window.mainloop()
+
+# For testing purposes
+if __name__ == "__main__":
+    root = tk.Tk()
+    create_service_window()
+    root.mainloop()
