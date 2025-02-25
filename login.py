@@ -19,10 +19,10 @@ def login():
     user = get_user(username)
     if user:
         password_hash = hashlib.sha256(password.encode()).hexdigest()
-        if user[2] == password_hash:
+        if user["password_hash"] == password_hash:  # Access using dictionary key
             messagebox.showinfo("Success", "Login successful!")
             root.destroy()
-            user_role = user[3]
+            user_role = user["role"]  # Access using dictionary key
             home_root = tk.Tk()
             create_home_window(home_root, user_role=user_role)  # Use the imported function
             home_root.mainloop()

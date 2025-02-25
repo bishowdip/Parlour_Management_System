@@ -15,7 +15,19 @@ def get_user(username):
     cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     user = cursor.fetchone()
     conn.close()
-    return user  # Returns user tuple if found, otherwise None
+    if user:
+        # Convert the tuple to a dictionary
+        user_dict = {
+            'id': user[0],
+            'username': user[1],
+            'password_hash': user[2],
+            'role': user[3],
+            'name': user[4],
+            'email': user[5],
+            'security_answer': user[6]
+        }
+        return user_dict
+    return None
 
 # Function to create tables
 def create_tables():

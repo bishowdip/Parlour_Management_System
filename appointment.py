@@ -27,7 +27,7 @@ def book_appointment(name_entry, service_var, contact_entry, date_picker, time_v
         return
 
     create_appointment(name, service_id, contact, appointment_date, appointment_time)
-    messagebox.showinfo("Success", "Appointment booked successfully!")
+    messagebox.showinfo("success", "Appointment has been booked successfully! If you want to cancel the appointment, please contact us from contact us section. Thank you!")
     clear_fields(name_entry, contact_entry, service_var, time_var)
     window.destroy()  # Close the appointment window after booking
 

@@ -1,24 +1,35 @@
-# forgot_password.py
 import tkinter as tk
 from tkinter import messagebox
-from database import get_user, update_password  # Ensure update_password is imported
+from database import get_user, update_password
+import hashlib  # For password hashing
 
 def reset_password():
-    username = username_entry.get()
-    security_answer = security_answer_entry.get()
-    new_password = new_password_entry.get()
+    username = username_entry.get().strip()
+    security_answer = security_answer_entry.get().strip()
+    new_password = new_password_entry.get().strip()
+
+    if not username or not security_answer or not new_password:
+        messagebox.showerror("Error", "All fields are required!")
+        return
 
     user = get_user(username)
     if not user:
         messagebox.showerror("Error", "Username not found!")
         return
 
-    if security_answer != user[5]:  # Verify security answer
+    # Debugging: Print the security answers
+    print(f"Database Security Answer: {user['security_answer']}")
+    print(f"Entered Security Answer: {security_answer}")
+
+    if security_answer != user["security_answer"]:  # Verify security answer
         messagebox.showerror("Error", "Incorrect security answer!")
         return
 
+    # Hash the new password
+    password_hash = hashlib.sha256(new_password.encode()).hexdigest()
+
     # Update password
-    update_password(username, new_password)
+    update_password(username, password_hash)
     messagebox.showinfo("Success", "Password reset successful! Please login.")
     back_to_login()
 

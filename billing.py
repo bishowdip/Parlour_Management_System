@@ -17,9 +17,14 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
 
     # Fetch services
     services = get_services()
-    prices = {service[1]: service[2] for service in services}
+    print("Services from database:", services)  # Debug: Print services
+
+    # Create prices and quantities dictionaries
+    prices = {service[1]: service[2] for service in services}  # service[1] = name, service[2] = price
     quantities = {service[1]: 0 for service in services}
     quantity_labels = {}
+
+    print("Prices dictionary:", prices)  # Debug: Print prices
 
     # Customer Name Label
     tk.Label(
@@ -62,8 +67,8 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
 
         # Preselect service if provided
         if service_name == preselected_service:
-            quantities[service_name] = 1
-            quantity_label.config(text="1")
+            quantities[service_name] = 1  # Set quantity to 1 for preselected service
+            quantity_label.config(text="1")  # Update the label to show quantity 1
 
         # Buttons
         tk.Button(frame, text="-", command=lambda s=service_name: adjust_quantity(s, -1)).pack(side=tk.LEFT)
@@ -73,6 +78,9 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
     total_label = tk.Label(billing_window, text="Total: NPR 0", font=("Arial", 14))
     total_label.pack(pady=20)
     tk.Button(billing_window, text="Calculate Total", command=calculate_total).pack(pady=10)
+
+    # Update total after preselecting the service
+    update_total()
 
     # Start mainloop if standalone
     if parent is None:
