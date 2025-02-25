@@ -90,6 +90,7 @@ def create_appointment_window(parent, preselected_service=None):
         text="Clear",
         command=lambda: clear_fields(name_entry, contact_entry, service_var, time_var)
     ).pack(pady=5)
+    
 
 def validate_contact(contact):
     """Validates that the contact number is exactly 10 digits."""
