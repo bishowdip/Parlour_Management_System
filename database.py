@@ -28,37 +28,6 @@ def get_user(username):
         return user_dict
     return None
 
-# Function to create for service tables
-def create_tables():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    # Create the services table with description
-    cursor.execute('''CREATE TABLE IF NOT EXISTS services (
-                      id INTEGER PRIMARY KEY,
-                      name TEXT UNIQUE,
-                      price REAL,
-                      description TEXT)''')
-
-    # Insert default services if they don't exist
-    default_services = [
-        ('Haircut', 200, 'Basic haircut service'),
-        ('Facial', 1000, 'Full facial treatment'),
-        ('Manicure', 1500, 'Nail care and grooming'),
-        ('Pedicure', 1200, 'Foot care and grooming'),
-        ('Massage', 2000, 'Relaxing body massage'),
-        ('Bridal Makeup', 8000, 'Special bridal makeup'),
-        ('Eyelashes', 1500, 'Eyelash extensions'),
-        ('Nail Extension', 1200, 'Nail extension service')
-    ]
-    cursor.executemany('''INSERT OR IGNORE INTO services (name, price, description)
-                          VALUES (?, ?, ?)''', default_services)
-
-    conn.commit()
-    conn.close()
-
-
-# Function to create tables
 def create_tables():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -73,20 +42,22 @@ def create_tables():
                       email TEXT,
                       security_answer TEXT)''')
 
-    # Create the contact_queries table
+    # Create the services table
+    cursor.execute('''CREATE TABLE IF NOT EXISTS services (
+                      id INTEGER PRIMARY KEY,
+                      name TEXT UNIQUE,
+                      price REAL,
+                      description TEXT)''')
+
+    # Create the contact_queries table with status column
     cursor.execute('''CREATE TABLE IF NOT EXISTS contact_queries (
                       id INTEGER PRIMARY KEY,
                       name TEXT,
                       email TEXT,
                       subject TEXT,
                       message TEXT,
+                      status TEXT DEFAULT 'Pending',  -- Add status column
                       submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP)''')
-
-    # Create the services table
-    cursor.execute('''CREATE TABLE IF NOT EXISTS services (
-                      id INTEGER PRIMARY KEY,
-                      name TEXT UNIQUE,
-                      price REAL)''')
 
     # Create the appointments table
     cursor.execute('''CREATE TABLE IF NOT EXISTS appointments (
@@ -107,22 +78,9 @@ def create_tables():
                       transaction_date DATETIME,
                       services_used TEXT)''')
 
-    # Insert default services if they don't exist
-    default_services = [
-        ('Haircut', 200),
-        ('Facial', 1000),
-        ('Manicure', 1500),
-        ('Pedicure', 1200),
-        ('Massage', 2000),
-        ('Bridal Makeup', 8000),
-        ('Eyelashes', 1500),
-        ('Nail Extension', 1200)
-    ]
-    cursor.executemany('''INSERT OR IGNORE INTO services (name, price)
-                          VALUES (?, ?)''', default_services)
-
     conn.commit()
     conn.close()
+
 
 # Function to drop the users table (for testing purposes)
 def drop_users_table():
@@ -172,6 +130,7 @@ def create_contact_query(name, email, subject, message):
     finally:
         conn.close()
 
+
 # Function to get all contact queries (for employees)
 def get_all_contact_queries():
     conn = get_db_connection()
@@ -199,11 +158,12 @@ def create_appointment(customer_name, service_id, contact, appointment_date, app
                           VALUES (?, ?, ?, ?, ?)''',
                        (customer_name, service_id, contact, appointment_date, appointment_time))
         conn.commit()
-        print(f"Appointment for '{customer_name}' created successfully!")  # Debugging
+        print(f"Appointment for '{customer_name}' created successfully!")
     except sqlite3.Error as e:
-        print(f"Error creating appointment: {e}")  # Debugging
+        print(f"Error creating appointment: {e}")
     finally:
         conn.close()
+
 
 # Function to create a new transaction
 def create_transaction(customer_name, total_amount, services_used):
@@ -233,7 +193,18 @@ def get_all_users():
 def get_all_appointments():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM appointments")
+    cursor.execute('''
+        SELECT 
+            appointments.id, 
+            appointments.customer_name, 
+            appointments.contact, 
+            services.name AS service_name, 
+            appointments.appointment_date, 
+            appointments.appointment_time, 
+            appointments.status
+        FROM appointments
+        LEFT JOIN services ON appointments.service_id = services.id
+    ''')
     appointments = cursor.fetchall()
     conn.close()
     return appointments
@@ -290,7 +261,6 @@ def delete_appointment(appointment_id):
 
 # Function to add a new service
 def add_service(name, price, description):
-    """Add a new service to the database."""
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -303,18 +273,19 @@ def add_service(name, price, description):
     finally:
         conn.close()
 
+
 # Function to get all services
 def get_services():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM services")
     services = cursor.fetchall()
+    print("Fetched services:", services)  # Debug: Print fetched services
     conn.close()
     return services
 
 # Function to delete a service
 def delete_service(service_id):
-    """Delete a service from the database by ID."""
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -324,3 +295,22 @@ def delete_service(service_id):
         print(f"Error deleting service: {e}")
     finally:
         conn.close()
+
+# Update query status
+def update_query_status(query_id, new_status):
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''UPDATE contact_queries 
+                          SET status = ?
+                          WHERE id = ?''',
+                       (new_status, query_id))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating query status: {e}")
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    create_tables()

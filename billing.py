@@ -20,9 +20,19 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
     print("Services from database:", services)  # Debug: Print services
 
     # Create prices and quantities dictionaries
-    prices = {service[1]: service[2] for service in services}  # service[1] = name, service[2] = price
-    quantities = {service[1]: 0 for service in services}
+    prices = {}
+    quantities = {}
     quantity_labels = {}
+
+    for service in services:
+        try:
+            # Ensure the price is a valid float
+            price = float(service[2])  # Convert price to float
+            prices[service[1]] = price
+            quantities[service[1]] = 0
+        except (ValueError, IndexError) as e:
+            print(f"Error processing service {service}: {e}")
+            continue  # Skip invalid services
 
     print("Prices dictionary:", prices)  # Debug: Print prices
 
@@ -43,7 +53,7 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
 
     def update_total():
         total = sum(qty * prices[srv] for srv, qty in quantities.items())
-        total_label.config(text=f"Total: NPR {total}")
+        total_label.config(text=f"Total: NPR {total:.2f}")  # Format total to 2 decimal places
 
     def calculate_total():
         total = sum(qty * prices[srv] for srv, qty in quantities.items() if qty > 0)
@@ -57,10 +67,13 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
     # Add services to UI
     for service in services:
         service_name = service[1]
+        if service_name not in prices:  # Skip invalid services
+            continue
+
         frame = tk.Frame(billing_window)
         frame.pack(pady=5)
 
-        tk.Label(frame, text=f"{service_name} (NPR {prices[service_name]})").pack(side=tk.LEFT)
+        tk.Label(frame, text=f"{service_name} (NPR {prices[service_name]:.2f})").pack(side=tk.LEFT)
         quantity_label = tk.Label(frame, text="0")
         quantity_label.pack(side=tk.LEFT, padx=10)
         quantity_labels[service_name] = quantity_label
@@ -75,7 +88,7 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
         tk.Button(frame, text="+", command=lambda s=service_name: adjust_quantity(s, 1)).pack(side=tk.LEFT)
 
     # Total label and button
-    total_label = tk.Label(billing_window, text="Total: NPR 0", font=("Arial", 14))
+    total_label = tk.Label(billing_window, text="Total: NPR 0.00", font=("Arial", 14))
     total_label.pack(pady=20)
     tk.Button(billing_window, text="Calculate Total", command=calculate_total).pack(pady=10)
 
@@ -87,4 +100,4 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
         root.mainloop()
 
 if __name__ == "__main__":
-    create_billing_window()  # Standalone mode
+    create_billing_window()

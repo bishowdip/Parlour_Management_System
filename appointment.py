@@ -25,6 +25,7 @@ def book_appointment(name_entry, service_var, contact_entry, date_picker, time_v
 
     services = get_services()
     service_id = next((s[0] for s in services if s[1] == service), None)
+
     if not service_id:
         messagebox.showerror("Error", "Invalid service selected!")
         return

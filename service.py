@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from database import get_services, add_service, delete_service  # Import database functions
+from database import get_services, add_service, delete_service
 
 def create_service_window(role):
     """Create and display the services window."""
@@ -17,7 +17,7 @@ def create_service_window(role):
     tree.heading("Price", text="Price")
     tree.heading("Description", text="Description")
 
-    # Configure column widths (optional)
+    # Configure column widths
     tree.column("ID", width=50, anchor="center")
     tree.column("Name", width=150)
     tree.column("Price", width=100, anchor="center")
@@ -30,7 +30,7 @@ def create_service_window(role):
         tree.delete(*tree.get_children())  # Clear existing data
         for service in get_services():
             # Ensure the order matches: ID, Name, Price, Description
-            tree.insert("", "end", values=(service[0], service[1], service[2], service[3]))
+            tree.insert("", "end", values=(service[0], service[1], f"RS {service[2]}", service[3]))
 
     # Add a new service
     def add_new_service():
