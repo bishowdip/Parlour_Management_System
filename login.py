@@ -44,8 +44,17 @@ def open_forgot_password():
 # Create login window
 root = tk.Tk()
 root.title("Login")
-root.geometry("400x300")
+root.geometry("400x300")  # Initial size of the window
 root.iconbitmap("login.ico")
+
+# Set maximum size of the window
+root.maxsize(800, 800)  # Maximum size of the window
+
+# Add background image
+background_image = tk.PhotoImage(file="login.png")
+background_label = tk.Label(root, image=background_image)
+background_label.place(x=0, y=0, relwidth=1, relheight=1)
+background_label.image = background_image  # Keep a reference to avoid garbage collection
 
 # Username
 tk.Label(root, text="Username:").grid(row=0, column=0, padx=10, pady=5, sticky="e")
