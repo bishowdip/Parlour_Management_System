@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from database import get_all_appointments, delete_appointment
+from database import get_all_appointments, delete_appointment, get_services, update_appointment
 from billing import create_billing_window
+from appointment import create_appointment_window  # Import the appointment window function
 
 def create_view_appointments_window(parent):
     window = tk.Toplevel(parent)
@@ -41,25 +42,6 @@ def create_view_appointments_window(parent):
 
     # Register validation command
     vcmd = (window.register(validate_phone_input), '%d', '%S')
-    def open_billing_from_appointment():
-        selected = tree.selection()
-        if not selected:
-            messagebox.showwarning("Warning", "Please select an appointment first!")
-            return
-
-        selected_values = tree.item(selected[0], 'values')
-        if not selected_values:
-            messagebox.showerror("Error", "Could not retrieve appointment details.")
-            return
-
-        # Extract appointment details
-        appointment_id = selected_values[0]
-        customer_name = selected_values[1]
-        service_name = selected_values[3]
-
-        # Open billing window as child of the appointments window
-        create_billing_window(window, customer_name, service_name)
-        
     phone_entry = tk.Entry(
         phone_frame, 
         textvariable=phone_search_var, 
@@ -140,7 +122,6 @@ def create_view_appointments_window(parent):
                     appt['status']
                 ))
 
-
     def open_billing_from_appointment():
         selected = tree.selection()
         if not selected:
@@ -160,8 +141,6 @@ def create_view_appointments_window(parent):
         # Open billing window with parent, customer name, and service
         create_billing_window(window, customer_name, service_name)
 
-
-
     def delete_selected():
         selected = tree.selection()
         if not selected:
@@ -173,14 +152,50 @@ def create_view_appointments_window(parent):
             delete_appointment(appointment_id)
             refresh_appointments()
 
+    def edit_selected():
+        selected = tree.selection()
+        if not selected:
+            messagebox.showwarning("Warning", "Please select an appointment first!")
+            return
+
+        selected_values = tree.item(selected[0], 'values')
+        if not selected_values:
+            messagebox.showerror("Error", "Could not retrieve appointment details.")
+            return
+
+        # Extract appointment details
+        appointment_id = selected_values[0]
+        customer_name = selected_values[1]
+        contact = selected_values[2]
+        service_name = selected_values[3]
+        appointment_date = selected_values[4]
+        appointment_time = selected_values[5]
+
+        # Open the appointment window with the selected appointment's details
+        create_appointment_window(
+            parent=window,
+            appointment_id=appointment_id,
+            customer_name=customer_name,
+            contact=contact,
+            service_name=service_name,
+            appointment_date=appointment_date,
+            appointment_time=appointment_time,
+            on_save=refresh_appointments  # Refresh the appointments list after saving
+        )
+
     # Bottom buttons
     tk.Button(bottom_btn_frame, text="Generate Bill", 
               command=open_billing_from_appointment).pack(side=tk.LEFT, padx=5)
 
+    tk.Button(bottom_btn_frame, text="Update Selected", 
+             command=edit_selected).pack(side=tk.LEFT, padx=5)
+    
     tk.Button(bottom_btn_frame, text="Delete Selected", 
              command=delete_selected).pack(side=tk.LEFT, padx=5)
+    
     tk.Button(bottom_btn_frame, text="Refresh List", 
              command=refresh_appointments).pack(side=tk.LEFT, padx=5)
+    
     tk.Button(bottom_btn_frame, text="Close", 
              command=window.destroy).pack(side=tk.LEFT, padx=5)
 

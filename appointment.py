@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter import messagebox
 from tkcalendar import DateEntry
 from datetime import datetime
-from database import get_services, create_appointment
+from database import get_services, create_appointment, update_appointment
 
-def book_appointment(name_entry, service_var, contact_entry, date_picker, time_var, window):
+from database import get_services, create_appointment, update_appointment  # Import update_appointment
+
+def book_appointment(name_entry, service_var, contact_entry, date_picker, time_var, window, appointment_id=None):
     name = name_entry.get()
     service = service_var.get()
     contact = contact_entry.get()
@@ -26,27 +28,36 @@ def book_appointment(name_entry, service_var, contact_entry, date_picker, time_v
         messagebox.showerror("Error", "Invalid service selected!")
         return
 
-    create_appointment(name, service_id, contact, appointment_date, appointment_time)
-    messagebox.showinfo("success", "Appointment has been booked successfully! If you want to cancel the appointment, please contact us from contact us section. Thank you!")
+    if appointment_id:
+        # Update existing appointment
+        update_appointment(appointment_id, name, service_id, contact, appointment_date, appointment_time)
+        messagebox.showinfo("Success", "Appointment has been updated successfully!")
+    else:
+        # Create new appointment
+        create_appointment(name, service_id, contact, appointment_date, appointment_time)
+        messagebox.showinfo("Success", "Appointment has been booked successfully! If you want to cancel the appointment, please contact us from contact us section. Thank you!")
     clear_fields(name_entry, contact_entry, service_var, time_var)
-    window.destroy()  # Close the appointment window after booking
-
+    window.destroy() 
+    
+ # Close the appointment window after booking or updating
 def clear_fields(name_entry, contact_entry, service_var, time_var):
     name_entry.delete(0, tk.END)
     contact_entry.delete(0, tk.END)
     service_var.set("")
     time_var.set("")
 
-def create_appointment_window(parent, preselected_service=None):
+def create_appointment_window(parent, appointment_id=None, customer_name=None, contact=None, service_name=None, appointment_date=None, appointment_time=None, on_save=None):
     # Create a Toplevel window instead of Tk()
     appointment_window = tk.Toplevel(parent)
-    appointment_window.title("Appointment Booking")
+    appointment_window.title("Appointment Booking" if not appointment_id else "Edit Appointment")
     appointment_window.geometry("500x400")
 
     # Name
     tk.Label(appointment_window, text="Name:").pack(pady=5)
     name_entry = tk.Entry(appointment_window)
     name_entry.pack(pady=5)
+    if customer_name:
+        name_entry.insert(0, customer_name)
     
 
     # Service
@@ -55,15 +66,18 @@ def create_appointment_window(parent, preselected_service=None):
     services = [s[1] for s in get_services()]
     service_dropdown = tk.OptionMenu(appointment_window, service_var, *services)
     service_dropdown.pack(pady=5)
-    if preselected_service and preselected_service in services:
-        service_var.set(preselected_service)
+    if service_name and service_name in services:
+        service_var.set(service_name)
     else:
-        service_var.set(services[0] if services else "")  # Default to first service
+        service_var.set(services[0] if services else "") # Default to first service
 
     # Contact
     tk.Label(appointment_window, text="Contact:").pack(pady=5)
     contact_entry = tk.Entry(appointment_window, validate="key", validatecommand=(appointment_window.register(validate_contact), "%P"))
     contact_entry.pack(pady=5)
+    if contact:
+        contact_entry.insert(0, contact)
+
 
     # Date Picker (restrict past dates)
     tk.Label(appointment_window, text="Date:").pack(pady=5)
@@ -81,8 +95,8 @@ def create_appointment_window(parent, preselected_service=None):
     # Buttons
     tk.Button(
         appointment_window,
-        text="Book Appointment",
-        command=lambda: book_appointment(name_entry, service_var, contact_entry, date_picker, time_var, appointment_window)
+        text="Book Appointment" if not appointment_id else "Update Appointment",
+        command=lambda: book_appointment(name_entry, service_var, contact_entry, date_picker, time_var, appointment_window, appointment_id)
     ).pack(pady=10)
     
     tk.Button(

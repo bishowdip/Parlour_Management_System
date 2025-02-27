@@ -247,6 +247,22 @@ def get_all_appointments():
     finally:
         conn.close()
 
+def update_appointment(appointment_id, customer_name, service_id, contact, appointment_date, appointment_time):
+    """Update an existing appointment."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''UPDATE appointments 
+                          SET customer_name=?, service_id=?, contact=?, appointment_date=?, appointment_time=?
+                          WHERE id=?''',
+                       (customer_name, service_id, contact, appointment_date, appointment_time, appointment_id))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error updating appointment: {e}")
+    finally:
+        conn.close()
+
+
 def delete_appointment(appointment_id):
     """Delete an appointment by ID."""
     conn = get_db_connection()

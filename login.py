@@ -35,7 +35,7 @@ def open_signup():
     root.destroy()  # Close login window
     import signup
     signup.create_signup_window()
-
+7
 def open_forgot_password():
     root.destroy()  # Close login window
     import forgot_password
