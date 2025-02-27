@@ -6,7 +6,7 @@ def create_home_window(root, user_role="employee"):
     root.title("Home")
     root.geometry("500x400")
     root.iconbitmap("logo.ico")
-    root.maxsize(800,800)
+    root.maxsize(800, 800)
 
     # Add background image
     background_image = tk.PhotoImage(file="background.png")
@@ -16,9 +16,9 @@ def create_home_window(root, user_role="employee"):
 
     # Welcome label (placed on top of background)
     welcome_label = tk.Label(root, 
-                           text="Welcome to Salon Management System", 
-                           font=("Arial", 16), 
-                           bg='#f0f0f0')  # Set background color matching your image
+                             text="Welcome to Salon Management System", 
+                             font=("Arial", 16), 
+                             bg='#f0f0f0')  # Set background color matching your image
     welcome_label.pack(pady=20)
 
     # Buttons with transparent background
@@ -26,7 +26,7 @@ def create_home_window(root, user_role="employee"):
     
     if user_role != "customer":
         buttons = [
-            ("Services", open_services),
+            ("Services", lambda: open_services(user_role)),  # Pass user_role to open_services
             ("Appointments", lambda: open_appointments(root)),
             ("View Appointments", lambda: view_appointments.create_view_appointments_window(root)),
             ("Billing", open_billing),
@@ -35,11 +35,10 @@ def create_home_window(root, user_role="employee"):
         ]
     else:
         buttons = [
-            ("Services", open_services),
+            ("Services", lambda: open_services(user_role)),  # Pass user_role to open_services
             ("Appointments", lambda: open_appointments(root)),
             ("Contact US", open_contact),
             ("About Us", open_about)
-        
         ]
 
     for text, command in buttons:
@@ -51,9 +50,9 @@ def create_home_window(root, user_role="employee"):
 
     # Logout button
     tk.Button(root, 
-             text="Logout", 
-             command=root.destroy,
-             **button_style).pack(pady=10)
+              text="Logout", 
+              command=root.destroy,
+              **button_style).pack(pady=10)
 
 # Rest of the functions remain the same
 def open_appointments(parent):
@@ -64,9 +63,9 @@ def open_billing():
     import billing
     billing.create_billing_window()
 
-def open_services():
+def open_services(user_role):  # Accept user_role as a parameter
     import service
-    service.create_service_window()
+    service.create_service_window(user_role)  # Pass user_role to create_service_window
 
 def open_contact():
     import Contact_Us
@@ -76,9 +75,7 @@ def open_about():
     import About_Us
     About_Us.create_about_window()
 
-
-
 if __name__ == "__main__":
     root = tk.Tk()
-    create_home_window(root, user_role="employee")
+    create_home_window(root, user_role="employee")  # Test as employee
     root.mainloop()

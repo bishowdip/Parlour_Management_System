@@ -71,7 +71,7 @@ def create_view_appointments_window(parent):
     columns = ("ID", "Name", "Contact", "Service", "Date", "Time", "Status")
     tree = ttk.Treeview(tree_frame, columns=columns, show='headings', selectmode='browse')
     
-    # Configure columns
+    """Configure columns"""
     tree.heading("ID", text="ID")
     tree.heading("Name", text="Name")
     tree.heading("Contact", text="Contact")
@@ -180,10 +180,10 @@ def create_view_appointments_window(parent):
             service_name=service_name,
             appointment_date=appointment_date,
             appointment_time=appointment_time,
-            on_save=refresh_appointments  # Refresh the appointments list after saving
+            on_save=refresh_appointments  # it will Refresh the appointments list after saving
         )
 
-    # Bottom buttons
+    #Bottom button
     tk.Button(bottom_btn_frame, text="Generate Bill", 
               command=open_billing_from_appointment).pack(side=tk.LEFT, padx=5)
 

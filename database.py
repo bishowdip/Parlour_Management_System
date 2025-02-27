@@ -1,4 +1,3 @@
-# database.py
 import sqlite3
 from datetime import datetime
 
@@ -10,7 +9,7 @@ def get_db_connection():
 
 # Function to get a user by username
 def get_user(username):
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     user = cursor.fetchone()
@@ -29,9 +28,39 @@ def get_user(username):
         return user_dict
     return None
 
+# Function to create for service tables
+def create_tables():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Create the services table with description
+    cursor.execute('''CREATE TABLE IF NOT EXISTS services (
+                      id INTEGER PRIMARY KEY,
+                      name TEXT UNIQUE,
+                      price REAL,
+                      description TEXT)''')
+
+    # Insert default services if they don't exist
+    default_services = [
+        ('Haircut', 200, 'Basic haircut service'),
+        ('Facial', 1000, 'Full facial treatment'),
+        ('Manicure', 1500, 'Nail care and grooming'),
+        ('Pedicure', 1200, 'Foot care and grooming'),
+        ('Massage', 2000, 'Relaxing body massage'),
+        ('Bridal Makeup', 8000, 'Special bridal makeup'),
+        ('Eyelashes', 1500, 'Eyelash extensions'),
+        ('Nail Extension', 1200, 'Nail extension service')
+    ]
+    cursor.executemany('''INSERT OR IGNORE INTO services (name, price, description)
+                          VALUES (?, ?, ?)''', default_services)
+
+    conn.commit()
+    conn.close()
+
+
 # Function to create tables
 def create_tables():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     # Create the users table
@@ -43,6 +72,8 @@ def create_tables():
                       name TEXT,
                       email TEXT,
                       security_answer TEXT)''')
+
+    # Create the contact_queries table
     cursor.execute('''CREATE TABLE IF NOT EXISTS contact_queries (
                       id INTEGER PRIMARY KEY,
                       name TEXT,
@@ -95,7 +126,7 @@ def create_tables():
 
 # Function to drop the users table (for testing purposes)
 def drop_users_table():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DROP TABLE IF EXISTS users")
     conn.commit()
@@ -103,7 +134,7 @@ def drop_users_table():
 
 # Function to create a new user
 def create_user(username, password_hash, role, name, email, security_answer):
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute('''INSERT INTO users (username, password_hash, role, name, email, security_answer)
@@ -118,7 +149,7 @@ def create_user(username, password_hash, role, name, email, security_answer):
 
 # Function to check the schema of the users table (for testing purposes)
 def check_users_table_schema():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("PRAGMA table_info(users)")
     columns = cursor.fetchall()
@@ -128,7 +159,7 @@ def check_users_table_schema():
 
 # Function to save a contact query
 def create_contact_query(name, email, subject, message):
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute('''INSERT INTO contact_queries (name, email, subject, message)
@@ -143,17 +174,16 @@ def create_contact_query(name, email, subject, message):
 
 # Function to get all contact queries (for employees)
 def get_all_contact_queries():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM contact_queries ORDER BY submitted_at DESC")
     queries = cursor.fetchall()
     conn.close()
     return queries
 
-
 # Function to get all services
 def get_services():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM services")
     services = cursor.fetchall()
@@ -162,7 +192,7 @@ def get_services():
 
 # Function to create a new appointment
 def create_appointment(customer_name, service_id, contact, appointment_date, appointment_time):
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute('''INSERT INTO appointments (customer_name, service_id, contact, appointment_date, appointment_time)
@@ -177,7 +207,7 @@ def create_appointment(customer_name, service_id, contact, appointment_date, app
 
 # Function to create a new transaction
 def create_transaction(customer_name, total_amount, services_used):
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute('''INSERT INTO transactions (customer_name, total_amount, transaction_date, services_used)
@@ -192,7 +222,7 @@ def create_transaction(customer_name, total_amount, services_used):
 
 # Function to get all users
 def get_all_users():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users")
     users = cursor.fetchall()
@@ -201,7 +231,7 @@ def get_all_users():
 
 # Function to get all appointments
 def get_all_appointments():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM appointments")
     appointments = cursor.fetchall()
@@ -210,7 +240,7 @@ def get_all_appointments():
 
 # Function to get all transactions
 def get_all_transactions():
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM transactions")
     transactions = cursor.fetchall()
@@ -219,7 +249,7 @@ def get_all_transactions():
 
 def update_password(username, new_password):
     """Update the password for a user."""
-    conn = sqlite3.connect('salon.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute('''UPDATE users SET password_hash = ? WHERE username = ?''',
@@ -228,22 +258,6 @@ def update_password(username, new_password):
         print(f"Password updated for user '{username}'.")  # Debugging
     except sqlite3.Error as e:
         print(f"Error updating password: {e}")  # Debugging
-    finally:
-        conn.close()
-
-
-
-def get_all_appointments():
-    """Get all appointments with service names."""
-    conn = get_db_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT a.*, s.name as service_name 
-            FROM appointments a
-            JOIN services s ON a.service_id = s.id
-        ''')
-        return cursor.fetchall()
     finally:
         conn.close()
 
@@ -262,7 +276,6 @@ def update_appointment(appointment_id, customer_name, service_id, contact, appoi
     finally:
         conn.close()
 
-
 def delete_appointment(appointment_id):
     """Delete an appointment by ID."""
     conn = get_db_connection()
@@ -272,5 +285,42 @@ def delete_appointment(appointment_id):
         conn.commit()
     except sqlite3.Error as e:
         print(f"Error deleting appointment: {e}")
+    finally:
+        conn.close()
+
+# Function to add a new service
+def add_service(name, price, description):
+    """Add a new service to the database."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''INSERT INTO services (name, price, description)
+                          VALUES (?, ?, ?)''',
+                       (name, price, description))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error adding service: {e}")
+    finally:
+        conn.close()
+
+# Function to get all services
+def get_services():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM services")
+    services = cursor.fetchall()
+    conn.close()
+    return services
+
+# Function to delete a service
+def delete_service(service_id):
+    """Delete a service from the database by ID."""
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM services WHERE id = ?", (service_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Error deleting service: {e}")
     finally:
         conn.close()
