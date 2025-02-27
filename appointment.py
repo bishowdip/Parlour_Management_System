@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-from tkcalendar import DateEntry
 from datetime import datetime
 from database import get_services, create_appointment
 
