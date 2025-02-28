@@ -25,10 +25,10 @@ def reset_password():
         messagebox.showerror("Error", "Incorrect security answer!")
         return
 
-    # Hash the new password
+    # Hashed the new password
     password_hash = hashlib.sha256(new_password.encode()).hexdigest()
 
-    # Update password
+    # to Update password
     update_password(username, password_hash)
     messagebox.showinfo("Success", "Password reset successful! Please login.")
     back_to_login()

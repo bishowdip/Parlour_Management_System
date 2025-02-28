@@ -83,7 +83,7 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
             quantities[service_name] = 1  # Set quantity to 1 for preselected service
             quantity_label.config(text="1")  # Update the label to show quantity 1
 
-        # Buttons
+        # Buttons to adjust quantity
         tk.Button(frame, text="-", command=lambda s=service_name: adjust_quantity(s, -1)).pack(side=tk.LEFT)
         tk.Button(frame, text="+", command=lambda s=service_name: adjust_quantity(s, 1)).pack(side=tk.LEFT)
 
@@ -92,7 +92,7 @@ def create_billing_window(parent=None, customer_name="", preselected_service="")
     total_label.pack(pady=20)
     tk.Button(billing_window, text="Calculate Total", command=calculate_total).pack(pady=10)
 
-    # Update total after preselecting the service
+    #Update total after preselecting the service
     update_total()
 
     # Start mainloop if standalone

@@ -1,4 +1,3 @@
-#appointment file
 import tkinter as tk
 from tkinter import messagebox
 from tkcalendar import DateEntry
@@ -14,7 +13,7 @@ def book_appointment(name_entry, service_var, contact_entry, date_picker, time_v
     appointment_date = date_picker.get_date().strftime("%Y-%m-%d")
     appointment_time = time_var.get()
 
-    # to make contact exactly  10 digits only
+    # Validate contact number (should be exactly 10 digits)
     if len(contact) != 10 or not contact.isdigit():
         messagebox.showerror("Error", "Please enter a valid 10-digit contact number!")
         return
@@ -25,7 +24,6 @@ def book_appointment(name_entry, service_var, contact_entry, date_picker, time_v
 
     services = get_services()
     service_id = next((s[0] for s in services if s[1] == service), None)
-
     if not service_id:
         messagebox.showerror("Error", "Invalid service selected!")
         return
