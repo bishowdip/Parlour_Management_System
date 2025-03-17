@@ -26,7 +26,7 @@ def create_home_window(root, user_role="employee"):
     
     if user_role != "customer":
         buttons = [
-            ("Services", open_services),
+            ("Services", lambda: open_services(user_role)),
             ("Appointments", lambda: open_appointments(root)),
             ("View Appointments", lambda: view_appointments.create_view_appointments_window(root)),
             ("Billing", open_billing),
@@ -35,7 +35,7 @@ def create_home_window(root, user_role="employee"):
         ]
     else:
         buttons = [
-            ("Services", open_services),
+            ("Services", lambda: open_services(user_role)),
             ("Appointments", lambda: open_appointments(root)),
             ("Contact US", open_contact),
             ("About Us", open_about)
@@ -64,10 +64,9 @@ def open_billing():
     import billing
     billing.create_billing_window()
 
-def open_services():
+def open_services(user_role):
     import service
-    role = "employee"  # Or fetch the role dynamically from the logged-in user
-    service.create_service_window(role)
+    service.create_service_window(user_role)
 
 
 def open_contact():
